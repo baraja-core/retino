@@ -36,9 +36,9 @@ final class Hydrator
 	 *    CUSTOMER: array<string, mixed>,
 	 *    TOTAL_PRICE: array{
 	 *       WITHOUT_VAT: float,
-	 *       WITH_VAT?: float,
-	 *       VAT?: float,
-	 *       VAT_RATE?: float
+	 *       WITH_VAT: float,
+	 *       VAT: float,
+	 *       ROUNDING: float
 	 *    },
 	 *    ORDER_ITEMS: array<int, mixed>
 	 * }
@@ -50,9 +50,13 @@ final class Hydrator
 			throw new \LogicException(sprintf('Customer for order "%s" is mandatory.', $order->getNumber()));
 		}
 
+		$vat = 0;
 		$items = [];
 		foreach ($order->getItems() as $orderItem) {
 			$items[] = $this->hydrateOrderItemToArray($orderItem);
+			$itemPrice = $orderItem->getFinalPrice();
+			$itemVat = $orderItem->getVat();
+			$vat += $itemPrice - $itemPrice * ($itemVat / 100);
 		}
 
 		return [
@@ -65,7 +69,12 @@ final class Hydrator
 			],
 			'PACKAGE_NUMBER' => $order->getPackageNumber(),
 			'CUSTOMER' => $this->hydrateCustomerToArray($order, $customer),
-			'TOTAL_PRICE' => $this->hydratePrice($order->getPrice(), $order->getVatRate()),
+			'TOTAL_PRICE' => [
+				'WITH_VAT' => $order->getPrice(),
+				'WITHOUT_VAT' => $order->getPrice() - $vat,
+				'VAT' => $vat,
+				'ROUNDING' => 0.0,
+			],
 			'ORDER_ITEMS' => array_map(static fn(array $item) => ['ITEM' => $item], $items),
 		];
 	}
