@@ -26,7 +26,7 @@ final class Hydrator
 	 *
 	 * @return array{
 	 *    ORDER_ID: string,
-	 *    CODE: string,
+	 *    CODE: non-empty-string,
 	 *    INVOICE_CODE: string|null,
 	 *    DATE: string,
 	 *    CURRENCY: array{
@@ -60,7 +60,7 @@ final class Hydrator
 		}
 
 		return [
-			'ORDER_ID' => $order->getId(),
+			'ORDER_ID' => (string) $order->getId(),
 			'CODE' => $order->getNumber(),
 			'INVOICE_CODE' => $order->getInvoiceNumber(),
 			'DATE' => $this->formatter->formatDateTime($order->getInsertedDate()),
@@ -82,8 +82,8 @@ final class Hydrator
 
 	/**
 	 * @return array{
-	 *    EMAIL: string,
-	 *    PHONE: string,
+	 *    EMAIL: string|null,
+	 *    PHONE: string|null,
 	 *    BILLING_ADDRESS: array<string, mixed>,
 	 *    SHIPPING_ADDRESS: array<string, mixed>
 	 * }

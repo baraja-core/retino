@@ -31,14 +31,15 @@ final class Retino
 			$orders[] = $this->hydrator->hydrate($order);
 		}
 
-		$return = $this->xmlRenderer->render(
-			[
-				'ORDERS' => array_map(
-					static fn(array $item): array => ['ORDER' => $item],
-					$orders,
-				),
-			],
-		);
+		$data = [
+			'ORDERS' => array_map(
+				static fn(array $item): array => ['ORDER' => $item],
+				$orders,
+			),
+		];
+
+		/** @phpstan-ignore-next-line */
+		$return = $this->xmlRenderer->render($data);
 
 		$this->stopTransaction();
 
