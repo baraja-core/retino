@@ -10,10 +10,10 @@
 	],
 	"require": {
 		"php": "^8.0",
-		"baraja-core/ecommerce-standard": "^0.0"
+		"baraja-core/ecommerce-standard": "^0.0",
+		"baraja-core/lock": "^1.0"
 	},
 	"require-dev": {
-		"baraja-core/lock": "^1.0",
 		"phpstan/phpstan": "^1.0",
 		"phpstan/extension-installer": "^1.1",
 		"phpstan/phpstan-nette": "^1.0",
