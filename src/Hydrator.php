@@ -9,6 +9,7 @@ use Baraja\EcommerceStandard\DTO\AddressInterface;
 use Baraja\EcommerceStandard\DTO\CustomerInterface;
 use Baraja\EcommerceStandard\DTO\OrderInterface;
 use Baraja\EcommerceStandard\DTO\OrderItemInterface;
+use Baraja\EcommerceStandard\DTO\PriceInterface;
 
 final class Hydrator
 {
@@ -54,8 +55,8 @@ final class Hydrator
 		$items = [];
 		foreach ($order->getItems() as $orderItem) {
 			$items[] = $this->hydrateOrderItemToArray($orderItem);
-			$itemPrice = $orderItem->getFinalPrice();
-			$itemVat = $orderItem->getVat();
+			$itemPrice = $orderItem->getFinalPrice()->getValue();
+			$itemVat = $orderItem->getVat()->getValue();
 			$vat += $itemPrice - $itemPrice * ($itemVat / 100);
 		}
 
@@ -71,7 +72,7 @@ final class Hydrator
 			'CUSTOMER' => $this->hydrateCustomerToArray($order, $customer),
 			'TOTAL_PRICE' => [
 				'WITH_VAT' => $order->getPrice(),
-				'WITHOUT_VAT' => $order->getPrice() - $vat,
+				'WITHOUT_VAT' => $order->getPrice()->getValue() - $vat,
 				'VAT' => $vat,
 				'ROUNDING' => 0.0,
 			],
@@ -141,14 +142,14 @@ final class Hydrator
 		if ($orderItem->isProductBased()) {
 			$code = $orderItem->getCode();
 			$variant = $orderItem->getVariant();
-			$variantName = $variant !== null ? $variant->getLabel() : null;
+			$variantName = $variant?->getLabel();
 		} else {
 			$code = sprintf('virtual-%d', $orderItem->getId());
 			$variantName = null;
 		}
 
 		$manufacturer = $orderItem->getManufacturer();
-		$unitPrice = $orderItem->getFinalPrice();
+		$unitPrice = (float) $orderItem->getFinalPrice()->getValue();
 		$totalPrice = $unitPrice * $orderItem->getAmount();
 
 		return [
@@ -156,7 +157,7 @@ final class Hydrator
 			'NAME' => $orderItem->getLabel(),
 			'CODE' => $code,
 			'VARIANT_NAME' => $variantName,
-			'MANUFACTURER' => $manufacturer !== null ? $manufacturer->getName() : null,
+			'MANUFACTURER' => $manufacturer?->getName(),
 			'AMOUNT' => $orderItem->getAmount(),
 			'UNIT' => $orderItem->getUnit(),
 			'WEIGHT' => $orderItem->getWeight(),
@@ -203,9 +204,10 @@ final class Hydrator
 	 *    VAT_RATE?: float
 	 * }
 	 */
-	private function hydratePrice(float $price, float $vatRate): array
+	private function hydratePrice(float $price, PriceInterface $vatRate): array
 	{
-		$vat = $price - $price * ($vatRate / 100);
+		$vatRateValue = (float) $vatRate->getValue();
+		$vat = $price - $price * ($vatRateValue / 100);
 		if (abs($vat) < 0.001) { // VAT has not been included
 			return [
 				'WITHOUT_VAT' => $price,
@@ -216,7 +218,7 @@ final class Hydrator
 			'WITH_VAT' => $price,
 			'WITHOUT_VAT' => $price - $vat,
 			'VAT' => $vat,
-			'VAT_RATE' => $vatRate,
+			'VAT_RATE' => $vatRateValue,
 		];
 	}
 }
