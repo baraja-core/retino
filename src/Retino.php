@@ -30,7 +30,7 @@ final class Retino
 
 		$data = [
 			'ORDERS' => array_map(
-				fn (OrderInterface $order): array => ['ORDER' => $this->hydrator->hydrate($order)],
+				fn(OrderInterface $order): array => ['ORDER' => $this->hydrator->hydrate($order)],
 				$orderCollection->getOrders(),
 			),
 		];
