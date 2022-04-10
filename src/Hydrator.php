@@ -60,6 +60,7 @@ final class Hydrator
 			$vat += $itemPrice - $itemPrice * ($itemVat / 100);
 		}
 
+		/** @phpstan-ignore-next-line */
 		return [
 			'ORDER_ID' => (string) $order->getId(),
 			'CODE' => $order->getNumber(),
